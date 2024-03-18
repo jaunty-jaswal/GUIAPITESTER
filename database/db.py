@@ -1,7 +1,11 @@
 import pymongo
 from fastapi import HTTPException,status
 from bson import ObjectId
-client = pymongo.MongoClient("mongodb+srv")
+import os
+from dotenv import load_dotenv
+load_dotenv()
+MONGO_CLIENT = os.getenv('KEY')
+client = pymongo.MongoClient( MONGO_CLIENT)
 db_name = client["Test"]
 collection = db_name["test_"]
 
