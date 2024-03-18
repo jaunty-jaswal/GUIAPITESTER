@@ -137,15 +137,6 @@ class Gui:
         except:
             self.label.config(text="Error!")
 
-    def display_output(self):
-        rout = subprocess.run(['ls','-l'],capture_output=True,text=True)
-        self.text.delete("1.0","end")
-        self.text.insert("end",rout.stdout)
-    def disp(self):
-        print("printing value---")
-        print(self.capture_terminal)
-
-
 
 if __name__ == "__main__":
     ob = Gui()
