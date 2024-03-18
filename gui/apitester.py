@@ -13,6 +13,7 @@ import subprocess
 import contextlib
 import io
 
+
 class Gui:
     
     
@@ -62,6 +63,7 @@ class Gui:
     def closeApi(self):
        with open('logs.txt',"w+") as f:
            f.flush()
+       os.remove('logs.txt')
        os.kill(os.getpid(),signal.SIGTERM)
 
     def start_Api(self):
