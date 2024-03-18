@@ -1,5 +1,6 @@
 import requests
 import tkinter as tk
+from tkinter import scrolledtext
 import threading
 import os
 from fastapi import FastAPI
@@ -8,36 +9,59 @@ sys.path.append('./')
 from routes import routes
 import uvicorn
 import signal
+import subprocess
+import contextlib
+import io
+
 class Gui:
     
     
     def __init__(self):
-        
+        self.info =""
         self.root_ = tk.Tk()
         self.root_.title("apitest")
+        self.capture_terminal = io.StringIO()
         self.label_ = tk.Label(self.root_,text="click start")
         self.button_ = tk.Button(self.root_,text="start")
+        self.text = scrolledtext.ScrolledText(self.root_, width =80, height=30)
+        self.text.grid(row=3)
         self.mainbutton = tk.Button(self.root_,text = "Startapi",command = self.start)
         self.mainbutton.grid(row=3,column=12)
         self.destroy = tk.Button(self.root_,text="close",command=self.closeApi)
         self.destroy.grid(row=3,column=13)
+        
         self.root_.mainloop()
         # self.root_.destroy()
 
     def server(self):
         app = FastAPI()
         app.include_router(routes.router)
-        uvicorn.run(app=app,host="127.0.0.1",port=8000)
+        with open('logs.txt','a+') as f:
+           with contextlib.redirect_stdout(f):
+              uvicorn.run(app=app,host="127.0.0.1",port=8000)
+        
+             
+    def capture_Out(self):
+        with open("logs.txt","r+")as f:
+            f.seek(0,2)
+            while True:
+                lines = f.readline()
+                self.text.insert(tk.END,lines)
 
 
     def start(self):
         thread1 = threading.Thread(target=self.server)
         thread2 = threading.Thread(target=self.start_Api)
+        thread3 = threading.Thread(target=self.capture_Out)
+        
         thread1.start()
         thread2.start()
-    
-
+        thread3.start()
+        
+  
     def closeApi(self):
+       with open('logs.txt',"w+") as f:
+           f.flush()
        os.kill(os.getpid(),signal.SIGTERM)
 
     def start_Api(self):
@@ -110,7 +134,17 @@ class Gui:
             self.label.config(text=rsponse)
         except:
             self.label.config(text="Error!")
-        
+
+    def display_output(self):
+        rout = subprocess.run(['ls','-l'],capture_output=True,text=True)
+        self.text.delete("1.0","end")
+        self.text.insert("end",rout.stdout)
+    def disp(self):
+        print("printing value---")
+        print(self.capture_terminal)
+
+
+
 if __name__ == "__main__":
     ob = Gui()
 
